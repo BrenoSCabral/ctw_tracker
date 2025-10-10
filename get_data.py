@@ -41,9 +41,10 @@ def proccess_data(data):
         _pandas.DataFrame_: DataFrame with the JSON data with only 1 column and hourly outputs
     '''
     df = pd.DataFrame(data)
-    df.index = df['timestamp']
+    df.index = pd.to_datetime(df['timestamp'])
     df = df.drop(['timestamp', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'MINUTE', 'SECOND'], axis=1)
 
+    df.resample('H').median()
     # precisa ainda reamostrar horario aqui
     return df
 
