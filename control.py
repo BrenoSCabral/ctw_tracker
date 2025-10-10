@@ -1,5 +1,6 @@
 from get_data import get_data
-from filt_data import filt_data
+import filt_data as filt
+import matplotlib.pyplot as plt
 
 def main():
     ids = {'Rio Grande 2 (RS)' : '303',
@@ -13,15 +14,27 @@ def main():
      'Pecém (CE)' : '307',
      'Ribamar (MA)' : '302'}
     
-    for name, id in ids.items:
+    for name, id in ids.items():
         try:
-            get_data(id)
+            data = get_data(id)
         except Exception as e:
             print(f'Problem getting the data --- {name} ---')
             print(e)
     
         try:
-            filt_data(id)
+            filtered_data = filt.filter_data(data)
+
+            plt.figure(figsize=(16,9))
+            plt.plot(filtered_data['filt'], label=name)
+            plt.grid()
+            plt.savefig(f'fig/{name}.png')
+
+            plt.close('all')
+
+
         except Exception as e:
             print(f'Problem filtering the data --- {name} ---')
             print(e)
+
+if __name__ == '__main__':
+    main()
