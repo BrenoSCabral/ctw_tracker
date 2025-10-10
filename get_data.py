@@ -23,8 +23,8 @@ def create_request(data_id):
     ini = now -5184000
 
     url = f'https://simcosta.furg.br/api/intrans_data?boiaID={data_id}&type=json&time1={ini}&time2={now}&params=water_l1'
-    print(f'ini: {datetime.fromtimestamp(ini)}')
-    print(f'fim: {datetime.fromtimestamp(now)}')
+    # print(f'ini: {datetime.fromtimestamp(ini)}')
+    # print(f'fim: {datetime.fromtimestamp(now)}')
 
     return url
 
@@ -44,7 +44,8 @@ def proccess_data(data):
     df.index = pd.to_datetime(df['timestamp'])
     df = df.drop(['timestamp', 'YEAR', 'MONTH', 'DAY', 'HOUR', 'MINUTE', 'SECOND'], axis=1)
 
-    df.resample('H').median()
+    df = df.resample('H').median()
+    df = df.rename(columns={'water_l1':'ssh'})
     # precisa ainda reamostrar horario aqui
     return df
 
