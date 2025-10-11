@@ -1,0 +1,73 @@
+[
+    
+    {
+        "name": "Rio Grande 2 (RS)",
+        "lat": -32.16,
+        "lon": -52.09,
+        "file": "graphs/rio_grande_2.html"
+    },
+
+    {
+        "name": "Tramandaí (RS)" ,
+        "lat": -30.0 ,
+        "lon": -50.13,
+        "file":  "graphs/tramandai.html"
+    },
+
+    {
+        "name": "Pontal do Sul (PR)",
+        "lat": -25.55,
+        "lon": -48.37,
+        "file":  "graphs/pontal_do_sul.html"
+    },
+
+    {
+        "name": "Paranaguá (PR)",
+        "lat": -25.5,
+        "lon": -48.53,
+        "file":  "graphs/paranagua.html"
+    },
+
+    {
+        "name": "Antonina (PR)",
+        "lat": -25.46,
+        "lon": -48.68,
+        "file":  "graphs/antonina.html"
+    },
+
+    {
+        "name": "Ilhabela (SP)",
+        "lat": -23.77,
+        "lon": -45.35,
+        "file":  "graphs/ilhabela.html"
+    },
+
+    {
+        "name": "DHN (RJ)",
+        "lat": -22.88,
+        "lon": -43.13,
+        "file":  "graphs/dhn.html"
+    },
+
+    {
+        "name": "Tamandaré (PE)",
+        "lat": -8.76,
+        "lon": -35.1,
+        "file":  "graphs/tamandare.html"
+    },
+
+    {
+        "name": "Pecém (CE)",
+        "lat": -3.53,
+        "lon": -38.79,
+        "file":  "graphs/pecem.html"
+    },
+
+    {
+        "name": "Rimabar (MA)",
+        "lat": -2.56,
+        "lon": -44.05,
+        "file":  "graphs/ribamar.html"
+    }
+    
+]
