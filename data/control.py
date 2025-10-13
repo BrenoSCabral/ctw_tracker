@@ -40,7 +40,7 @@ def main():
                             'index': 'UTC Time'
                         })
             filename = remove_accents(name.lower().replace(' ', '_')[:-5])
-            fig.write_html(f"graphs/{filename}.html")
+            fig.write_html(f"../graphs/{filename}.html")
 
 
 
