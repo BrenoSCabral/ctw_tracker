@@ -1,5 +1,3 @@
-<!-- Rodar python -m http.server 8000 pra ver localmente -->
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -10,7 +8,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon_io/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon_io/favicon-16x16.png">
   <link rel="manifest" href="favicon_io/site.webmanifest">
-
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -23,6 +20,25 @@
       overflow: hidden;
     }
 
+    @media (max-width: 768px) {
+      #chart-panel {
+        top: 60px; /* respeita a navbar */
+        height: calc(100% - 60px);
+      }
+
+      #chart-panel.open {
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 3000;
+      }
+
+      #chart-frame {
+        height: 100%;
+      }
+    }
+
     #map {
       width: 100%;
       height: 100%;
@@ -32,7 +48,7 @@
     /* Painel lateral */
     #chart-panel {
       position: absolute;
-      top: 0;
+      top: 60px;
       right: 0;
       width: 0;
       height: 100%;
@@ -76,50 +92,219 @@
       width: 100%;
       border: none;
     }
+
+    .site-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px 12px;
+      transition: color 0.3s ease;
+    }
+
+    .site-title:hover {
+      color: #007bff;
+    }
+
+    .glass-navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .navbar-content {
+      width: 90%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-buttons button {
+      margin-left: 12px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(0, 123, 255, 0.8);
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.3s ease;
+    }
+
+    .navbar-buttons button:hover {
+      background: rgba(0, 123, 255, 1);
+    }
+
+    /* Modal Sobre */
+    #about-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 4000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #about-box {
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #about-box h3 {
+      margin: 0 0 20px 0;
+      color: #333;
+      font-size: 1.5rem;
+      width: 100%;
+    }
+
+    #about-box p {
+      line-height: 1.5;
+      color: #555;
+      margin: 0 0 16px 0;
+      width: 100%;
+      text-align: center;
+    }
+
+    #about-box a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    #about-box a:hover {
+      text-decoration: underline;
+    }
+
+    #about-box button {
+      margin-top: 8px;
+      padding: 10px 24px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s ease;
+    }
+
+    #about-box button:hover {
+      background: #0056b3;
+    }
   </style>
 </head>
 <body>
-
-
-  <div id="map"></div>
-
-  <div id="chart-panel">
-    <div id="chart-header">
-      <h2 id="station-name">Estação</h2>
-      <button id="close-btn" title="Fechar">×</button>
+<nav class="glass-navbar">
+  <div class="navbar-content">
+    <button class="site-title" onclick="goHome()">CTW Tracker</button>
+    <div class="navbar-buttons">
+      <button id="about-btn" onclick="openAbout()">Sobre</button>
+      <button id="lang-btn">EN / PT</button>
     </div>
-    <iframe id="chart-frame"></iframe>
   </div>
+</nav>
 
+<div id="map"></div>
 
+<div id="info-box" style="
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  max-width: 300px;
+  background: rgba(255,255,255,0.9);
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  font-size: 0.85rem;
+  font-family: system-ui, sans-serif;
+  color: #333;
+  display: none;
+  z-index: 1500;
+">
+</div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div id="chart-panel">
+  <div id="chart-header">
+    <h2 id="station-name">Estação</h2>
+    <button id="close-btn" title="Fechar">×</button>
+  </div>
+  <iframe id="chart-frame"></iframe>
+</div>
 
-  <script>
-    // Mapa inicial
-    const map = L.map('map', {
-      zoomControl: false,
-      attributionControl: false
-    }).setView([-20, -44], 4);
+<!-- Modal Sobre -->
+<div id="about-modal">
+  <div id="about-box">
+    <h3 id="about-title">Sobre o CTW Tracker</h3>
+    <p id="about-description">
+      Aplicação interativa para monitoramento em tempo real das ondas confinadas costeiras (CTWs) na margem continental brasileira, com dados do <a href="https://www.simcosta.furg.br/home" target="_blank">SIMCosta</a>.
+    </p>
+    <p id="about-author">Desenvolvido por <strong>Breno Cabral</strong>.</p>
+    <p id="about-code">Código da aplicação disponível <a href="https://github.com/BrenoSCabral/ctw_tracker" target="_blank" title="GitHub">aqui</a></p>
+    <button id="about-close-btn" onclick="closeAbout()">Fechar</button>
+  </div>
+</div>
 
-    // Camada base clean
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 12
-    }).addTo(map);
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    const pinIcon = L.icon({
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      iconSize: [25, 40],
-      iconAnchor: [12, 40],
-      popupAnchor: [0, -30]
-    });
+<script>
+  // Mapa inicial
+  const map = L.map('map', {
+    zoomControl: false,
+    attributionControl: false
+  }).setView([-20, -44], 4);
 
-    const chartPanel = document.getElementById('chart-panel');
-    const chartFrame = document.getElementById('chart-frame');
-    const stationName = document.getElementById('station-name');
-    const closeBtn = document.getElementById('close-btn');
+  // Camada base clean
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 12
+  }).addTo(map);
 
-    let activeStation = null;
+  const pinIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    iconSize: [25, 40],
+    iconAnchor: [12, 40],
+    popupAnchor: [0, -30]
+  });
+
+  const chartPanel = document.getElementById('chart-panel');
+  const chartFrame = document.getElementById('chart-frame');
+  const stationName = document.getElementById('station-name');
+  const closeBtn = document.getElementById('close-btn');
+  const aboutModal = document.getElementById('about-modal');
+  const langBtn = document.getElementById('lang-btn');
+  const aboutBtn = document.getElementById('about-btn');
+
+  // Elementos para tradução
+  const aboutTitle = document.getElementById('about-title');
+  const aboutDescription = document.getElementById('about-description');
+  const aboutAuthor = document.getElementById('about-author');
+  const aboutCode = document.getElementById('about-code')
+  const aboutCloseBtn = document.getElementById('about-close-btn');
+
+  let activeStation = null;
+  let isEnglish = false;
 
   function openChart(station) {
     activeStation = station;
@@ -131,165 +316,99 @@
 
     // Espera animação/resize e então reajusta o mapa
     setTimeout(() => {
+      const targetZoom = 8;
+      const positionFraction = 1;
 
-        // Escolha do zoom desejado quando o painel abre:
-        // - usar um zoom fixo (6) ou manter o zoom atual: map.getZoom()
-        const targetZoom = 8; // ajuste aqui se preferir outro zoom
+      const latlng = L.latLng(station.lat, station.lon);
+      const point = map.project(latlng, targetZoom);
 
+      const latlng1 = L.latLng(station.lat, station.lon + 3);
+      const point1 = map.project(latlng1, targetZoom);
 
-        // posição horizontal desejada do marcador dentro da área do mapa (fração 0..1)
-        // 0.5 = centro; <0.5 desloca mais para a esquerda (útil para liberar espaço à direita)
-        const positionFraction = 1; // ajuste entre 0.2 e 0.45 até ficar do jeito que prefere
+      const diffX = point1.x - point.x;
+      const newPoint = point.add([diffX, 0]);
+      const newCenter = map.unproject(newPoint, targetZoom);
 
-        // projeta o ponto no mesmo zoom que vamos usar
-        const latlng = L.latLng(station.lat, station.lon);
-        const point = map.project(latlng, targetZoom);
-
-        const latlng1 = L.latLng(station.lat, station.lon +3);
-        const point1 = map.project(latlng1, targetZoom);
-
-        const diffX = point1.x - point.x;
-
-
-        const newPoint = point.add([diffX, 0]);
-
-        const newCenter = map.unproject(newPoint, targetZoom);
-
-        // muda a vista para o novo centro + zoom
-        map.setView(newCenter, targetZoom, { animate: true });
-    }, 350); // deve corresponder ao tempo da sua animação CSS (0.3s -> 300ms). Aumente se necessário.
+      // muda a vista para o novo centro + zoom
+      map.setView(newCenter, targetZoom, { animate: true });
+    }, 350);
   }
 
+  function closeChart() {
+    chartPanel.classList.remove('open');
+    chartFrame.src = '';
+    activeStation = null;
 
-    function closeChart() {
-      chartPanel.classList.remove('open');
-      chartFrame.src = '';
-      activeStation = null;
+    // Espera o painel fechar para reajustar o mapa
+    setTimeout(() => {
+      map.invalidateSize();
+      map.setView([-20, -44], 4, { animate: true });
+    }, 350);
+  }
 
-      // Espera o painel fechar para reajustar o mapa
-      setTimeout(() => {
-        map.invalidateSize();
-        map.setView([-20, -44], 4, { animate: true });
-      }, 350);
-    }
+  closeBtn.addEventListener('click', closeChart);
 
-    closeBtn.addEventListener('click', closeChart);
+  // ========== Funções da Navbar ==========
+  function goHome() {
+    closeChart(); // Fecha painel lateral se estiver aberto
+    map.setView([-20, -44], 4, { animate: true }); // Volta à visão inicial
+  }
 
-    // Carrega estações
-    fetch('infos.json')
-      .then(response => response.json())
-      .then(stations => {
-        stations.forEach(st => {
-          const marker = L.marker([st.lat, st.lon], { icon: pinIcon }).addTo(map);
-          marker.bindTooltip(st.name, { permanent: false, direction: 'top' });
-          marker.on('click', () => openChart(st));
-        });
-      })
-      .catch(err => console.error('Erro ao carregar infos.json:', err));
-      
-  </script>
+  function openAbout() {
+    aboutModal.style.display = 'flex';
+  }
 
-<script>
-  // ---------- Painel informativo superior direito ----------
-  const infoControl = L.Control.extend({
-    options: { position: 'topright' },
-    onAdd: function (map) {
-      const container = L.DomUtil.create('div', 'info-panel');
-      container.style.background = 'rgba(255, 255, 255, 0.85)';
-      container.style.padding = '12px 16px';
-      container.style.borderRadius = '10px';
-      container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-      container.style.maxWidth = '250px';
-      container.style.transition = 'opacity 0.3s ease';
-      container.style.fontFamily = 'system-ui, sans-serif';
-      container.style.color = '#333';
-      container.style.position = 'relative';
-      
-      L.DomEvent.disableClickPropagation(container);
-      
-      container.innerHTML = `
-        <h3 style="margin:0 0 8px 0;">CTW Tracker</h3>
-        <div id="info-text" style="transition: opacity 0.3s ease;">
-          <p style="margin:0 0 8px 0; font-size:0.85rem;">
-            Aplicação para monitoramento em tempo real das ondas confinadas costeiras na margem continental brasileira utilizando os dados do <a href="https://www.simcosta.furg.br/home" target="_blank">SIMCosta</a>.
-          </p>
-          <p style="margin:0 0 12px 0; font-size:0.85rem;">
-          </p>
-        </div>
-        <button id="lang-btn" style="
-          padding: 4px 8px;
-          border:none;
-          border-radius:6px;
-          background:#007bff;
-          color:white;
-          cursor:pointer;
-          font-size:0.85rem;
-          margin-bottom:4px;
-        ">EN / PT</button>
-        <button id="close-info-btn" style="
-          position:absolute;
-          top:4px;
-          right:8px;
-          background:transparent;
-          border:none;
-          font-size:18px;
-          cursor:pointer;
-          color:#333;
-        " title="Fechar">×</button>
-      `;
-      return container;
+  function closeAbout() {
+    aboutModal.style.display = 'none';
+  }
+
+  // Fechar modal clicando fora
+  aboutModal.addEventListener('click', function(e) {
+    if (e.target === aboutModal) {
+      closeAbout();
     }
   });
 
-  const info = new infoControl();
-  map.addControl(info);
+  // ========== Sistema de Tradução ==========
+  function toggleLanguage() {
+    if (!isEnglish) {
+      // Mudar para Inglês
+      langBtn.textContent = 'PT / EN';
+      aboutBtn.textContent = 'About';
+      aboutTitle.textContent = 'About CTW Tracker';
+      aboutDescription.innerHTML = 'Interactive application for real-time monitoring of coastal trapped waves (CTWs) on the Brazilian continental margin, with data from <a href="https://www.simcosta.furg.br/home" target="_blank">SIMCosta</a>.';
+      aboutAuthor.innerHTML = 'Developed by <strong>Breno Cabral</strong>.';
+      aboutCode.innerHTML = 'Application code available <a href="https://github.com/BrenoSCabral/ctw_tracker" target="_blank" title="GitHub">here</a>';
+      aboutCloseBtn.textContent = 'Close';
+      stationName.textContent = 'Station'; // Atualiza o título do painel se estiver aberto
+    } else {
+      // Mudar para Português
+      langBtn.textContent = 'EN / PT';
+      aboutBtn.textContent = 'Sobre';
+      aboutTitle.textContent = 'Sobre o CTW Tracker';
+      aboutDescription.innerHTML = 'Aplicação interativa para monitoramento em tempo real das ondas confinadas costeiras (CTWs) na margem continental brasileira, com dados do <a href="https://www.simcosta.furg.br/home" target="_blank">SIMCosta</a>.';
+      aboutAuthor.innerHTML = 'Desenvolvido por <strong>Breno Cabral</strong>.';
+      aboutCode.innerHTML = 'Código da aplicação disponível <a href="https://github.com/BrenoSCabral/ctw_tracker" target="_blank" title="GitHub">aqui</a>';
+      aboutCloseBtn.textContent = 'Fechar';
+      stationName.textContent = 'Estação'; // Atualiza o título do painel se estiver aberto
+    }
+    isEnglish = !isEnglish;
+  }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const container = document.querySelector('.info-panel');
-    const closeBtn = document.getElementById('close-info-btn');
-    const langBtn = document.getElementById('lang-btn');
-    const infoText = document.getElementById('info-text');
+  // Adicionar evento de clique ao botão de idioma
+  langBtn.addEventListener('click', toggleLanguage);
 
-    // Toggle painel visível
-    closeBtn.addEventListener('click', () => {
-      container.style.opacity = '0';
-      setTimeout(() => container.style.display = 'none', 300);
-    });
-
-    // Toggle idioma EN/PT
-    let isEnglish = false;
-    langBtn.addEventListener('click', () => {
-      infoText.style.opacity = '0';
-      setTimeout(() => {
-        if (!isEnglish) {
-          infoText.innerHTML = `
-            <p style="margin:0 0 8px 0; font-size:0.85rem;">
-              Real-time monitoring of coastal trapped waves at the brazilian continental margin using <a href="https://www.simcosta.furg.br/home" target="_blank">SIMCosta</a> data.
-            </p>
-            <p style="margin:0 0 12px 0; font-size:0.85rem;">
-              
-            </p>
-          `;
-          langBtn.textContent = 'PT / EN';
-        } else {
-          infoText.innerHTML = `
-            <p style="margin:0 0 8px 0; font-size:0.85rem;">
-            Aplicação para monitoramento em tempo real das ondas confinadas costeiras na margem continental brasileira utilizando os dados do <a href="https://www.simcosta.furg.br/home" target="_blank">SIMCosta</a>.
-            </p>
-            <p style="margin:0 0 12px 0; font-size:0.85rem;">
-            </p>
-          `;
-          langBtn.textContent = 'EN / PT';
-        }
-        isEnglish = !isEnglish;
-        infoText.style.opacity = '1';
-      }, 250); // duração da animação
-    });
-  });
-
-
+  // Carrega estações
+  fetch('infos.json')
+    .then(response => response.json())
+    .then(stations => {
+      stations.forEach(st => {
+        const marker = L.marker([st.lat, st.lon], { icon: pinIcon }).addTo(map);
+        marker.bindTooltip(st.name, { permanent: false, direction: 'top' });
+        marker.on('click', () => openChart(st));
+      });
+    })
+    .catch(err => console.error('Erro ao carregar infos.json:', err));
 </script>
-
-
 </body>
 </html>
