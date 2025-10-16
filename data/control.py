@@ -1,7 +1,17 @@
+'''
+TODO:
+
+Cortar a serie and eu tiver descontinuidade de dado
+Pegar toda a serie temporal dos instrumentos, mas focar o display nos dois últimos meses somente
+Criar uma Navbar
+'''
+
 from get_data import get_data
-import filt_data as filt
+from process_data import process_data as proc_data
 import unicodedata
-import plotly.express as px
+import plotly.graph_objects as go
+import datetime
+from datetime import timedelta
 
 
 def remove_accents(input_str):
@@ -29,16 +39,47 @@ def main():
             print(e)
     
         try:
-            filtered_data = filt.filter_data(data)
-            filtered_data['station'] = name
-            filtered_data.index.name = 'Date (UTC Time)'
+            filtered_data = proc_data(data)
 
-            fig = px.line(filtered_data, x=filtered_data.index, 
-                          y='filt', title=f'CTW monitor - {name}',
-                          labels={
-                            'filt': 'Sea Surface Height (cm)',
-                            'index': 'UTC Time'
-                        })
+
+            fig = go.Figure()
+            for seg in filtered_data:
+                seg['station'] = name
+                seg.index = seg.index.normalize()
+                seg.index.name = 'Date (UTC Time)'
+
+                fig.add_trace(go.Scatter(
+                x=seg.index,
+                y=seg['filt'],
+                mode='lines',
+                line=dict(color='royalblue', width=2),
+                showlegend=False, # não mostra na legenda,
+                name='',
+                hovertemplate=(
+                    '<b>Date</b> %{x}<br>' +
+                    '<b>Sea Surface Height (cm):</b> %{y:.2f}<extra></extra>'
+                )
+                ))
+
+            # fig.update_layout(
+            #     xaxis=dict(fixedrange=False),
+            #     yaxis=dict(fixedrange=True)
+            # )
+
+
+            end_date = datetime.datetime.now() - datetime.timedelta(hours=3)
+            start_date = end_date - datetime.timedelta(days=60)
+
+            fig.update_layout(
+                title=f'CTW monitor - {name}',
+                xaxis_title='Date (UTC Time)',
+                yaxis_title='Sea Surface Height (cm)',
+                template='plotly_white'
+            )
+            fig.update_xaxes(range=[start_date, end_date])
+    
+
+
             filename = remove_accents(name.lower().replace(' ', '_')[:-5])
             fig.write_html(f"../graphs/{filename}.html")
 
