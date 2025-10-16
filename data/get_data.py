@@ -20,7 +20,8 @@ def create_request(data_id):
     '''
     now = datetime.now().replace(minute=0, second=0, microsecond=0)
     now = int(now.timestamp()) + 3 * 60 * 60
-    ini = now -5184000
+    ini = 0
+    # ini = now -5184000
 
     url = f'https://simcosta.furg.br/api/intrans_data?boiaID={data_id}&type=json&time1={ini}&time2={now}&params=water_l1'
     # print(f'ini: {datetime.fromtimestamp(ini)}')
@@ -29,7 +30,7 @@ def create_request(data_id):
     return url
 
 
-def proccess_data(data):
+def resample_data(data):
     '''_summary_
     Proccesses the JSON data obtained by the API and returns it into a pandas DataFrame
 
@@ -66,6 +67,6 @@ def get_data(id):
     response = requests.get(URL)
     response.raise_for_status()
 
-    data = proccess_data(response.json())
+    data = resample_data(response.json())
     
     return data
